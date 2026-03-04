@@ -1,10 +1,40 @@
 import UserNotifications
 import Foundation
 
+private let kEmergencyNotifiedKey = "emergency_notified_ids"
+
 struct NotificationScheduler {
 
     static func requestPermission() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in }
+    }
+
+    /// Fire immediate notifications for emergency deadlines not previously alerted.
+    static func notifyEmergencyNow(deadlines: [Deadline]) {
+        let center = UNUserNotificationCenter.current()
+        var notifiedIds = Set(UserDefaults.standard.stringArray(forKey: kEmergencyNotifiedKey) ?? [])
+
+        for d in deadlines where d.isEmergency {
+            guard !notifiedIds.contains(d.id) else { continue }
+            notifiedIds.insert(d.id)
+
+            let content = UNMutableNotificationContent()
+            let isOverdue = (d.dueDate?.timeIntervalSinceNow ?? 0) < 0
+            content.title = isOverdue ? "🚨 Overdue: \(d.title)" : "🚨 Due in < 3 hours: \(d.title)"
+            content.body  = d.course.map { "\($0) — \(d.relativeTime)" } ?? d.relativeTime
+            content.sound = .defaultCritical
+
+            let request = UNNotificationRequest(
+                identifier: "emergency-\(d.id)",
+                content: content,
+                trigger: nil   // nil = deliver immediately
+            )
+            center.add(request) { error in
+                if let error = error { print("Emergency notification error:", error) }
+            }
+        }
+
+        UserDefaults.standard.set(Array(notifiedIds), forKey: kEmergencyNotifiedKey)
     }
 
     static func scheduleAll(deadlines: [Deadline]) {
@@ -54,7 +84,7 @@ struct NotificationScheduler {
         let request = UNNotificationRequest(identifier: id, content: content, trigger: trigger)
 
         UNUserNotificationCenter.current().add(request) { error in
-            if let error { print("Notification schedule error:", error) }
+            if let error = error { print("Notification schedule error:", error) }
         }
     }
 }

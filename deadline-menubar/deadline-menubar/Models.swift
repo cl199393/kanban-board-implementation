@@ -68,6 +68,12 @@ struct Deadline: Identifiable, Codable {
         guard let due = dueDate else { return false }
         return due.timeIntervalSinceNow < 86400
     }
+
+    /// Overdue or due within 3 hours
+    var isEmergency: Bool {
+        guard let due = dueDate else { return false }
+        return due.timeIntervalSinceNow < 3 * 3600
+    }
 }
 
 // MARK: - Color hex init

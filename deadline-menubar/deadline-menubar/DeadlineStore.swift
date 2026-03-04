@@ -16,6 +16,7 @@ final class DeadlineStore: ObservableObject {
         Task.detached(priority: .background) { [weak self] in
             let fetched = DatabaseReader.fetchUpcoming(days: 30)
             await MainActor.run { self?.deadlines = fetched }
+            NotificationScheduler.notifyEmergencyNow(deadlines: fetched)
         }
     }
 

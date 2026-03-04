@@ -29,15 +29,44 @@ struct MenuBarView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 24)
             } else {
+                let emergency = store.deadlines.filter(\.isEmergency)
+                let normal    = store.deadlines.filter { !$0.isEmergency }
+
                 ScrollView {
                     LazyVStack(spacing: 0) {
-                        ForEach(store.deadlines) { deadline in
+                        if !emergency.isEmpty {
+                            HStack {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundColor(.red)
+                                    .font(.system(size: 11, weight: .bold))
+                                Text("EMERGENCY")
+                                    .font(.system(size: 11, weight: .bold))
+                                    .foregroundColor(.red)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 5)
+                            .background(Color.red.opacity(0.08))
+
+                            ForEach(emergency) { deadline in
+                                DeadlineRow(deadline: deadline)
+                                    .background(Color.red.opacity(0.04))
+                                Divider().padding(.leading, 12)
+                            }
+
+                            if !normal.isEmpty {
+                                Divider()
+                                    .padding(.vertical, 2)
+                            }
+                        }
+
+                        ForEach(normal) { deadline in
                             DeadlineRow(deadline: deadline)
                             Divider().padding(.leading, 12)
                         }
                     }
                 }
-                .frame(maxHeight: 400)
+                .frame(maxHeight: 420)
             }
 
             Divider()

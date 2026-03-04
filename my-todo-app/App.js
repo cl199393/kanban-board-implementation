@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import TodoScreen from './screens/TodoScreen';
 import DeadlinesScreen from './screens/DeadlinesScreen';
+import BoardScreen from './screens/BoardScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,7 +17,7 @@ export default function App() {
         screenOptions={({ route }) => ({
           headerShown: false,
           tabBarIcon: ({ size }) => {
-            const icons = { Todos: '✅', Deadlines: '📅' };
+            const icons = { Todos: '✅', Deadlines: '📅', Board: '📋' };
             return <Text style={{ fontSize: size - 4 }}>{icons[route.name]}</Text>;
           },
           tabBarActiveTintColor: '#4CAF50',
@@ -26,6 +27,7 @@ export default function App() {
       >
         <Tab.Screen name="Todos" component={TodoScreen} />
         <Tab.Screen name="Deadlines" component={DeadlinesScreen} />
+        <Tab.Screen name="Board" component={BoardScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
