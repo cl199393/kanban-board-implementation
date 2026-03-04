@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet } from 'react-native';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -53,7 +53,7 @@ export default function KanbanCard({ card }) {
         {/* Zootopia character headshot */}
         {character && (
           <View style={[styles.characterRow, { backgroundColor: character.bg }]}>
-            <Text style={styles.characterEmoji}>{character.emoji}</Text>
+            <Image source={character.image} style={styles.characterImg} />
             <Text style={[styles.characterLabel, { color: character.color }]}>{character.label}</Text>
           </View>
         )}
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     gap: 4,
   },
-  characterEmoji: { fontSize: 18 },
+  characterImg: { width: 32, height: 32, borderRadius: 16, marginRight: 2 },
   characterLabel: { fontSize: 10, fontWeight: '700', flex: 1 },
   headerRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4, paddingHorizontal: 10, paddingTop: 8 },
   sourceDot: { width: 8, height: 8, borderRadius: 4, marginRight: 5 },

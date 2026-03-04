@@ -118,16 +118,23 @@ class DeadlineMenuBar(rumps.App):
         normal    = [d for d in self.deadlines
                      if not is_emergency(d["due_at"]) and seconds_until(d["due_at"]) >= 86400]
 
-        # ── Menu bar title ──────────────────────────────────────────────
+        # ── Menu bar title: character emoji + time ──────────────────────
         if emergency:
             first = emergency[0]
-            short = first["title"][:30] + "…" if len(first["title"]) > 30 else first["title"]
+            timer = relative_time(first["due_at"])
             extra = f" +{len(emergency)-1}" if len(emergency) > 1 else ""
-            self.title = f"🚨 {short}{extra}"
+            self.title = f"🦊 {timer}{extra}"
         elif urgent:
-            self.title = f"📅 {len(urgent)}"
+            first = urgent[0]
+            timer = relative_time(first["due_at"])
+            extra = f" +{len(urgent)-1}" if len(urgent) > 1 else ""
+            self.title = f"🐰 {timer}{extra}"
+        elif [d for d in self.deadlines if seconds_until(d["due_at"]) < 72 * 3600]:
+            soon_list = [d for d in self.deadlines if seconds_until(d["due_at"]) < 72 * 3600]
+            timer = relative_time(soon_list[0]["due_at"])
+            self.title = f"🐃 {timer}"
         else:
-            self.title = "📅"
+            self.title = "🦥"
 
         # ── Fire immediate notifications for new emergencies ─────────────
         for d in emergency:
@@ -143,12 +150,14 @@ class DeadlineMenuBar(rumps.App):
 
         # Emergency section (pinned at top)
         if emergency:
-            menu_items.append(rumps.MenuItem("🚨  EMERGENCY"))
+            menu_items.append(rumps.MenuItem("🦊  EMERGENCY — Nick's on it!"))
             for d in emergency:
                 timer = relative_time(d["due_at"])
-                title = d["title"][:40] + "…" if len(d["title"]) > 40 else d["title"]
+                ddl = format_date(d["due_at"])
+                title = d["title"][:50] + "…" if len(d["title"]) > 50 else d["title"]
                 source = SOURCE_LABELS.get(d["source"], d["source"])
-                menu_items.append(rumps.MenuItem(f"   [{timer}] {title}  ({source})"))
+                menu_items.append(rumps.MenuItem(f"   🚨 {title}"))
+                menu_items.append(rumps.MenuItem(f"      📅 {ddl}  [{timer}]  {source}"))
             menu_items.append(None)
 
         if not self.deadlines:
@@ -156,12 +165,14 @@ class DeadlineMenuBar(rumps.App):
         else:
             # Urgent section
             if urgent:
-                menu_items.append(rumps.MenuItem("⚠️  Due within 24h"))
+                menu_items.append(rumps.MenuItem("🐰  Judy says hurry! (< 24h)"))
                 for d in urgent:
                     icon = SOURCE_ICONS.get(d["source"], "⚪")
                     timer = relative_time(d["due_at"])
-                    title = d["title"][:40] + "…" if len(d["title"]) > 40 else d["title"]
-                    menu_items.append(rumps.MenuItem(f"   {icon} [{timer}] {title}"))
+                    ddl = format_date(d["due_at"])
+                    title = d["title"][:50] + "…" if len(d["title"]) > 50 else d["title"]
+                    menu_items.append(rumps.MenuItem(f"   {icon} {title}"))
+                    menu_items.append(rumps.MenuItem(f"      📅 {ddl}  [{timer}]"))
                 menu_items.append(None)
 
             # Normal deadlines grouped by date
@@ -170,8 +181,10 @@ class DeadlineMenuBar(rumps.App):
                 try:
                     due_dt = datetime.fromisoformat(d["due_at"].replace("Z", "+00:00")).astimezone()
                     date_label = due_dt.strftime("%a, %b %d")
+                    time_label = due_dt.strftime("%I:%M %p")
                 except Exception:
                     date_label = d["due_at"][:10]
+                    time_label = ""
 
                 if date_label != current_date:
                     if current_date is not None:
@@ -181,8 +194,10 @@ class DeadlineMenuBar(rumps.App):
 
                 icon = SOURCE_ICONS.get(d["source"], "⚪")
                 timer = relative_time(d["due_at"])
-                title = d["title"][:40] + "…" if len(d["title"]) > 40 else d["title"]
-                menu_items.append(rumps.MenuItem(f"{icon} [{timer}] {title}"))
+                title = d["title"][:50] + "…" if len(d["title"]) > 50 else d["title"]
+                source = SOURCE_LABELS.get(d["source"], d["source"])
+                menu_items.append(rumps.MenuItem(f"   {icon} {title}"))
+                menu_items.append(rumps.MenuItem(f"      📅 {time_label}  [{timer}]  {source}"))
 
         menu_items.append(None)
         menu_items.append(rumps.MenuItem("Refresh", callback=self.on_refresh))

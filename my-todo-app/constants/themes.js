@@ -47,7 +47,7 @@ export const THEMES = {
     characters: {
       // overdue or < 3h → Nick Wilde (sly, urgent)
       emergency: {
-        emoji: '🦊',
+        image: require('../assets/characters/nick.png'),
         name: 'Nick',
         label: "Nick's on it!",
         color: '#BF360C',
@@ -55,7 +55,7 @@ export const THEMES = {
       },
       // < 24h → Judy Hopps (determined)
       urgent: {
-        emoji: '🐰',
+        image: require('../assets/characters/judy.png'),
         name: 'Judy',
         label: 'Judy says hurry!',
         color: '#6A1B9A',
@@ -63,7 +63,7 @@ export const THEMES = {
       },
       // < 72h → Chief Bogo (watching)
       soon: {
-        emoji: '🐃',
+        image: require('../assets/characters/bogo.png'),
         name: 'Chief Bogo',
         label: 'Bogo is watching',
         color: '#1565C0',
@@ -71,7 +71,7 @@ export const THEMES = {
       },
       // ≥ 72h → Flash (slow, no rush)
       normal: {
-        emoji: '🦥',
+        image: require('../assets/characters/flash.png'),
         name: 'Flash',
         label: 'Flash says relax~',
         color: '#2E7D32',
