@@ -34,6 +34,12 @@ A personal productivity system with three components:
   </tr>
 </table>
 
+### 🦊 Zootopia Theme
+
+Switch themes with the 🎨 button. The Zootopia theme adds character headshots based on urgency: Nick (emergency), Judy (<24h), Chief Bogo (<72h), Flash (≥72h).
+
+<img src="docs/screenshots/zootopia.png" width="280" alt="Zootopia theme with character headshots"/>
+
 ### 🎉 Confetti Celebration
 
 Drag any card to **Done** and confetti fires across the whole screen!
@@ -157,7 +163,7 @@ cd deadline-sync
 python menubar.py
 ```
 
-A 📅 icon appears in the menu bar showing upcoming deadlines grouped by date with countdown timers. Urgent deadlines (< 24h) are highlighted in red.
+A character icon appears in the menu bar showing the most urgent deadline's remaining time: 🦊 (emergency <3h), 🐰 (urgent <24h), 🐃 (soon <72h), 🦥 (normal). Click to see all deadlines with exact due dates and timestamps.
 
 ---
 
