@@ -4,8 +4,30 @@ A personal productivity system with three components:
 
 - **Python CLI** — simple command-line todo app
 - **Deadline Sync Daemon** — aggregates deadlines from Canvas (GT + UCF), Gmail, and Microsoft, serves them over a local REST API
-- **React Native Web App** — Todos + Deadlines tabs, runs in the browser
-- **macOS Menu Bar App** — live deadline countdown in your menu bar, auto-refreshes every 2 minutes
+- **React Native Web App** — Todos, Deadlines, and Board tabs; runs in the browser via `MyTodo.app`
+- **macOS Menu Bar App** — live deadline countdown in your menu bar, emergency alerts, auto-refreshes every 2 minutes
+
+---
+
+## Interface
+
+<table>
+  <tr>
+    <td align="center"><b>Todos</b></td>
+    <td align="center"><b>Deadlines</b></td>
+    <td align="center"><b>Board</b></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/todos.png" width="220" alt="Todos tab"/></td>
+    <td><img src="docs/screenshots/deadlines.png" width="220" alt="Deadlines tab"/></td>
+    <td><img src="docs/screenshots/board.png" width="220" alt="Board tab"/></td>
+  </tr>
+  <tr>
+    <td>Add todos with optional due dates. Dates are color-coded: 🔴 overdue · 🟠 today · 🔵 future.</td>
+    <td>Deadlines grouped by date, sourced from Canvas GT/UCF, Microsoft, and Gmail. Pull to refresh.</td>
+    <td>Drag-and-drop Kanban board with month calendar. Day view shows emergency deadlines, deadlines, and todos for the selected date.</td>
+  </tr>
+</table>
 
 ---
 
