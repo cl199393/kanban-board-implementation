@@ -1,0 +1,63 @@
+CHANG LIU
+3213145140 | Orlando, FL 32816 | changliu19930903@gmail.com | LinkedIn | Github | Google Scholar
+EDUCATION
+PhD Candidate in Big Data Analytics Aug. 2023 – May 2027
+University of Central Florida Orlando, FL
+MSc in Management Sciences and Quantitative Methods Sep. 2019 – Aug. 2020
+University of Wisconsin - Madison Madison, WI
+RESEARCH PROJECT
+Personalized Feature Selection Framework for Adaptive Fall Risk Modeling Jan. 2025 – Aug. 2025
+University of Central Florida Orlando, FL
+• Developed a personalized fall risk identification framework using a hierarchical multi-agent reinforcement learning framework
+on multimodal longitudinal health data, improving prediction precision by 5% over state-of-the-art graph and time-series baselines.
+• Captured complex dependencies among fall risk factors by embedding a hierarchical graph-structured encoder on diverse data,
+including self-reported survey, body composition, and gait assessment, improving modeling of complex fall risk factors interaction.
+• Modeled evolving physical activity patterns from wearable sensor by integrated time-series transformer encoder with cross-
+attention mechanism to align and fuse temporal sequence, enhancing temporal dynamic and structural feature relationships.
+• Delivered a deployable a reproducible PyTorch-based pipeline with end-to-end visualizations and documentation for clinical
+decision-making intervention.
+Diffusion Policies with Offline Inverse Reinforcement Learning to Promote Physical Activity Jan. 2024 – Sep. 2024
+University of Central Florida Orlando, FL
+• Designed a diffusion policy with offline inverse reinforcement learning framework (KANDI) by deploying Kolmogorov-Arnold
+Networks with diffusion policies to model aging adults’ behavior on continuous time scale in a two-arm clustered randomized trial
+for 134 community-dwelling older adults.
+• Inferred latent reward functions from expert trajectories by leveraging Kolmogorov-Arnold Networks-based Inverse
+Reinforcement Learning (KAN-based IRL) to address the challenge of unobserved rewards in healthcare environment.
+• Captured the high-dimensional and multi-time-solution policy by implementing the PyTorch-based diffusion policy model,
+achieving a 7% improvement in the weighted average return over state-of-the-art offline RL baselines on the D4RL benchmark.
+• Delivered interpretable behavior patterns and policy trajectories to guide decision-making and enhance physical activity
+engagement among older adults.
+WORK EXPERIENCE
+Business Analyst Mar. 2022 – Aug. 2023
+Super Micro Computer, Inc. San Jose, CA
+• Forecasted inventory demand and weekly sales by developing and deploying predictive models using XGBoost and autoregressive
+time series in Python and R, reducing obsolete inventory by 15% and increasing sales target attainment by 8%.
+• Engineered an ETL pipeline optimized for machine learning applications, employing advanced SQL and Python for data extraction
+and feature engineering, contributing to the effective financial management of inventory about $10M.
+• Enabled data-driven decision-making by automating forecasting workflows and implemented performance dashboards, delivering
+real-time predictive insights to sales operations and excusive leadership.
+Data Analyst Nov. 2020 – Feb. 2022
+FlyHigh Group, Inc. Santa Clara, CA
+• Developed a high-precision NER system using Python SpaCy with custom segmentation and feature engineering, achieving 92-
+95% parsing accuracy across training and test datasets.
+• Improved model generalization and reduced overfitting in entire classification system by conducting 10-fold cross-validation with
+Scikit-learn on over 2700 labeled entities within 600 documents.
+• Automated the data cleaning pipeline for OCR-derived text, employing noise reduction and format normalization techniques,
+leading to a 15% boost in downstream classification accuracy.
+TECHNICAL SKILLS
+• Core Expertise: Reinforcement Learning, Machine Learning, Deep Learning, Graph Networks, Time Series Modeling
+• Programming Languages: Python, R, SQL
+• Analytic Tools: Tableau, Power BI, Excel (Power Query, Pivot Table), SPSS
+• Databases: MySQL, SQL Server, Azure Data Studio, Access
+SELECTED PUBLICATIONS
+• Liu, C. et al., (2026). SafePath: A Personalized Feature Selection Framework for Adaptive Fall Risk Factor Identification and
+Prevention in Older Adults, Under Review.
+• Liu, C., Thiamwong, L., Fu, Y., & Xie, R. (2025). Diffusion Policies with Offline and Inverse Reinforcement Learning for
+Promoting Physical Activity in Older Adults Using Wearable Sensors, Proceedings of the 2025 International Conference on
+Machine Learning and Applications (ICMLA), doi: 10.1109/ICMLA66185.2025.00043.
+• Liu, C., Xie, R., & Chen, Z. Towards Actionable Recommendations for Exam Preparation Using Isomorphic Problem Banks and
+Explainable Machine Learning. In Frontiers in Education (Vol. 10, p. 1632132). Frontiers. doi:
+https://doi.org/10.3389/feduc.2025.1632132.
+• Bourgault, A., Logvinov, I., Liu, C., Xie, R., Powers, J., & Sole, M. L. (2025). Use of Machine Learning Models to Predict
+Microaspiration Measured by Tracheal Pepsin A. American Journal of Critical Care, 34(1), 67-71. doi:
+https://doi.org/10.4037/ajcc2025349.

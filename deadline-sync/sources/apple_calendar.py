@@ -134,7 +134,7 @@ def sync_all() -> int:
     try:
         result = subprocess.run(
             ["osascript", "-e", script],
-            capture_output=True, text=True, timeout=60
+            capture_output=True, text=True, timeout=120
         )
     except subprocess.TimeoutExpired:
         logger.error("apple_calendar: AppleScript timed out")

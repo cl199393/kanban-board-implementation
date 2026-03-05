@@ -21,7 +21,14 @@
   "gmail": {
     "credentials_file": "./auth/credentials.json",
     "token_file": "./auth/token.json",
-    "keywords": ["due", "deadline", "assignment", "quiz", "exam", "submit by"]
+    "keywords": [
+      "due",
+      "deadline",
+      "assignment",
+      "quiz",
+      "exam",
+      "submit by"
+    ]
   },
   "ical_feeds": [
     {
@@ -30,7 +37,24 @@
       "url": "YOUR_GT_ICAL_URL"
     }
   ],
-  "sync": { "interval_minutes": 15, "lookahead_days": 30 },
-  "server": { "host": "0.0.0.0", "port": 8765 },
-  "notifications": { "notify_1d_before": true, "notify_1h_before": true }
+  "sync": {
+    "interval_minutes": 15,
+    "lookahead_days": 30
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8765
+  },
+  "notifications": {
+    "notify_1d_before": true,
+    "notify_1h_before": true
+  },
+  "apple_calendar": {
+    "include_calendars": [
+      "\u4e2a\u4eba",
+      "Calendar",
+      "UCF",
+      "changliu19930903@gmail.com"
+    ]
+  }
 }

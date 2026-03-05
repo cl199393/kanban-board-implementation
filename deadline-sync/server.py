@@ -2,6 +2,7 @@
 import json
 import threading
 from datetime import datetime, timezone, timedelta
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -121,6 +122,115 @@ def get_todos():
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
+
+
+@app.patch("/todos/{todo_id}")
+def update_todo(todo_id: int, body: dict):
+    try:
+        with open(TODOS_PATH) as f:
+            todos = json.load(f)
+        updated = False
+        for t in todos:
+            if t.get("id") == todo_id:
+                if "done" in body:
+                    t["done"] = body["done"]
+                updated = True
+                break
+        if not updated:
+            raise HTTPException(status_code=404, detail="Todo not found")
+        with open(TODOS_PATH, "w") as f:
+            json.dump(todos, f, indent=2, ensure_ascii=False)
+        return {"status": "updated"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+JOBS_DB_PATH = str(Path.home() / "Downloads" / "gmail_bot.db")
+
+@app.get("/jobs")
+def get_jobs():
+    import sqlite3
+    try:
+        conn = sqlite3.connect(JOBS_DB_PATH)
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT * FROM job_applications ORDER BY updated_at DESC"
+        ).fetchall()
+        conn.close()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+@app.patch("/jobs/{job_id}")
+def update_job(job_id: int, body: dict):
+    import sqlite3
+    status = body.get("status")
+    if not status:
+        raise HTTPException(status_code=400, detail="status required")
+    try:
+        from datetime import datetime, timezone
+        conn = sqlite3.connect(JOBS_DB_PATH)
+        conn.execute(
+            "UPDATE job_applications SET status = ?, updated_at = ? WHERE id = ?",
+            (status, datetime.now(timezone.utc).isoformat(), job_id),
+        )
+        conn.commit()
+        conn.close()
+        return {"status": "updated"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+RESUME_PATH = "/Users/changliu/my-todo/resume.txt"
+GEMINI_API_KEY = None  # loaded lazily from env
+
+def _get_gemini_key():
+    import os
+    from dotenv import load_dotenv
+    load_dotenv("/Users/changliu/acamail/.env")
+    return os.getenv("GEMINI_API_KEY", "")
+
+@app.post("/tailor-resume")
+def tailor_resume(body: dict):
+    jd = body.get("job_description", "").strip()
+    if not jd:
+        raise HTTPException(status_code=400, detail="job_description required")
+    try:
+        with open(RESUME_PATH) as f:
+            resume = f.read()
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Resume file not found")
+
+    prompt = f"""You are an expert resume coach helping tailor a resume for a specific job.
+
+RESUME:
+{resume}
+
+JOB DESCRIPTION:
+{jd}
+
+Analyze the job description and provide:
+1. **Match Score** (0-100): How well the current resume matches this role
+2. **Missing Keywords**: Important keywords/skills from the JD not in the resume
+3. **Bullet Point Rewrites**: Pick 3-5 existing resume bullets and rewrite them to better match the JD (show original → improved)
+4. **Summary Statement**: Write a 2-3 sentence tailored professional summary for this specific role
+5. **Key Strengths to Highlight**: Top 3 things from the resume that are most relevant to this role
+
+Be specific, actionable, and concise. Format clearly with headers."""
+
+    try:
+        from google import genai
+        key = _get_gemini_key()
+        client = genai.Client(api_key=key)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash", contents=prompt
+        )
+        return {"result": response.text}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/ical-feeds")

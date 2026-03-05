@@ -20,6 +20,16 @@ final class DeadlineStore: ObservableObject {
         }
     }
 
+    func dismiss(id: String) {
+        // Optimistically remove from list
+        deadlines.removeAll { $0.id == id }
+        // Call API to persist
+        guard let url = URL(string: "http://localhost:8765/deadlines/\(id.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? id)/dismiss") else { return }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        URLSession.shared.dataTask(with: req).resume()
+    }
+
     private func startTimer() {
         // Refresh every 2 minutes
         timer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DeadlineRow: View {
     let deadline: Deadline
+    @EnvironmentObject var store: DeadlineStore
 
     var body: some View {
         HStack(spacing: 10) {
@@ -32,6 +33,14 @@ struct DeadlineRow: View {
             Text(deadline.relativeTime)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundColor(deadline.isUrgent ? .red : .secondary)
+
+            // Dismiss button
+            Button(action: { store.dismiss(id: deadline.id) }) {
+                Image(systemName: "checkmark.circle")
+                    .font(.system(size: 14))
+                    .foregroundColor(.secondary)
+            }
+            .buttonStyle(PlainButtonStyle())
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 12)

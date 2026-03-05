@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   StyleSheet, Text, View, TextInput, TouchableOpacity,
   FlatList, KeyboardAvoidingView, Platform, Alert, ScrollView,
@@ -69,7 +70,23 @@ export default function TodoScreen() {
   });
   const [location, setLocation] = useState('');
   const [locationLoading, setLocationLoading] = useState(false);
+  const [timezone, setTimezone] = useState(null);
   const stripRef = useRef(null);
+  const timerRef = useRef(null);
+
+  function getNow(tz) {
+    const now = tz
+      ? new Date(new Date().toLocaleString('en-US', { timeZone: tz }))
+      : new Date();
+    return `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  }
+
+  // Auto-refresh time every minute while screen is focused
+  useFocusEffect(useCallback(() => {
+    setDueTime(getNow(timezone));
+    timerRef.current = setInterval(() => setDueTime(getNow(timezone)), 60000);
+    return () => clearInterval(timerRef.current);
+  }, [timezone]));
 
   useEffect(() => { load(); }, []);
 
@@ -86,6 +103,10 @@ export default function TodoScreen() {
       if (place) {
         const parts = [place.name, place.city || place.district, place.region].filter(Boolean);
         setLocation(parts.slice(0, 2).join(', '));
+        if (place.timezone) {
+          setTimezone(place.timezone);
+          setDueTime(getNow(place.timezone));
+        }
       }
     } catch {
       setLocation('');
@@ -137,7 +158,16 @@ export default function TodoScreen() {
   }
 
   function toggleDone(id) {
-    save(todos.map(t => t.id === id ? { ...t, done: !t.done } : t));
+    const updated = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    save(updated);
+    const todo = updated.find(t => t.id === id);
+    if (todo) {
+      fetch(`${BACKEND_URL}/todos/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ done: todo.done }),
+      }).catch(() => {});
+    }
   }
 
   function deleteTodo(id) {

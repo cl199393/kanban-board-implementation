@@ -9,8 +9,11 @@ from datetime import datetime, timezone
 sys.path.insert(0, os.path.dirname(__file__))
 
 import rumps
+import urllib.request
+import urllib.parse
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "deadlines.db")
+API_URL = "http://localhost:8765"
 
 SOURCE_LABELS = {
     "canvas_gt":  "GT Canvas",
@@ -98,6 +101,19 @@ def notify(title: str, message: str, subtitle: str = ""):
     subprocess.run(["osascript", "-e", script], capture_output=True)
 
 
+def dismiss_deadline(deadline_id: str):
+    """Call the API to dismiss a deadline."""
+    try:
+        encoded = urllib.parse.quote(deadline_id, safe="")
+        req = urllib.request.Request(
+            f"{API_URL}/deadlines/{encoded}/dismiss",
+            method="POST",
+        )
+        urllib.request.urlopen(req, timeout=5)
+    except Exception:
+        pass
+
+
 class DeadlineMenuBar(rumps.App):
     def __init__(self):
         super().__init__("📅", quit_button=None)
@@ -158,6 +174,13 @@ class DeadlineMenuBar(rumps.App):
                 source = SOURCE_LABELS.get(d["source"], d["source"])
                 menu_items.append(rumps.MenuItem(f"   🚨 {title}"))
                 menu_items.append(rumps.MenuItem(f"      📅 {ddl}  [{timer}]  {source}"))
+                did = d["id"]
+                def make_dismiss(deadline_id, app=self):
+                    def on_dismiss(_):
+                        dismiss_deadline(deadline_id)
+                        app.refresh_menu()
+                    return on_dismiss
+                menu_items.append(rumps.MenuItem(f"      ✓ Dismiss", callback=make_dismiss(did)))
             menu_items.append(None)
 
         if not self.deadlines:

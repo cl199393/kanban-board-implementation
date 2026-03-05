@@ -7,6 +7,8 @@ import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import TodoScreen from './screens/TodoScreen';
 import DeadlinesScreen from './screens/DeadlinesScreen';
 import BoardScreen from './screens/BoardScreen';
+import JobsScreen from './screens/JobsScreen';
+import ResumeScreen from './screens/ResumeScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -17,7 +19,7 @@ function Tabs() {
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ size }) => {
-          const icons = { Todos: '✅', Deadlines: '📅', Board: '📋' };
+          const icons = { Todos: '✅', Deadlines: '📅', Board: '📋', Jobs: '💼', Resume: '📄' };
           return <Text style={{ fontSize: size - 4 }}>{icons[route.name]}</Text>;
         },
         tabBarActiveTintColor: theme.tabActive,
@@ -28,6 +30,8 @@ function Tabs() {
       <Tab.Screen name="Todos" component={TodoScreen} />
       <Tab.Screen name="Deadlines" component={DeadlinesScreen} />
       <Tab.Screen name="Board" component={BoardScreen} />
+      <Tab.Screen name="Jobs" component={JobsScreen} />
+      <Tab.Screen name="Resume" component={ResumeScreen} />
     </Tab.Navigator>
   );
 }

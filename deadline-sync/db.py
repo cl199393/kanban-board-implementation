@@ -70,8 +70,8 @@ def get_upcoming(days: int = 30) -> list[dict]:
             """
             SELECT * FROM deadlines
             WHERE dismissed = 0
-              AND due_at >= datetime('now')
-              AND due_at <= datetime('now', ? || ' days')
+              AND datetime(due_at) >= datetime('now')
+              AND datetime(due_at) <= datetime('now', ? || ' days')
             ORDER BY due_at ASC
             """,
             (str(days),),
@@ -94,11 +94,11 @@ def get_pending_notifications() -> list[dict]:
             """
             SELECT * FROM deadlines
             WHERE dismissed = 0
-              AND due_at >= datetime('now')
+              AND datetime(due_at) >= datetime('now')
               AND (
-                (notified_1d = 0 AND due_at <= datetime('now', '25 hours') AND due_at > datetime('now', '23 hours'))
+                (notified_1d = 0 AND datetime(due_at) <= datetime('now', '25 hours') AND datetime(due_at) > datetime('now', '23 hours'))
                 OR
-                (notified_1h = 0 AND due_at <= datetime('now', '65 minutes') AND due_at > datetime('now', '55 minutes'))
+                (notified_1h = 0 AND datetime(due_at) <= datetime('now', '65 minutes') AND datetime(due_at) > datetime('now', '55 minutes'))
               )
             """
         ).fetchall()

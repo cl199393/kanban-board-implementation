@@ -24,8 +24,8 @@ struct DatabaseReader {
                    dismissed, notified_1d, notified_1h, created_at, updated_at
             FROM deadlines
             WHERE dismissed = 0
-              AND due_at >= datetime('now')
-              AND due_at <= datetime('now', '\(days) days')
+              AND datetime(due_at) >= datetime('now')
+              AND datetime(due_at) <= datetime('now', '\(days) days')
             ORDER BY due_at ASC
             """
 
