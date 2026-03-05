@@ -56,12 +56,14 @@ export default function DeadlinesScreen() {
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const stripRef = useRef(null);
 
-  useEffect(() => {
+  function refreshOverleafLinks() {
     fetch(`${BACKEND_URL}/overleaf-links`)
       .then(r => r.ok ? r.json() : {})
       .then(setOverleafLinks)
       .catch(() => {});
-  }, []);
+  }
+
+  useEffect(() => { refreshOverleafLinks(); }, []);
 
   // Scroll to today on mount
   useEffect(() => {
@@ -142,7 +144,14 @@ export default function DeadlinesScreen() {
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => <DeadlineCard item={item} onDismiss={dismiss} overleafLinks={overleafLinks} />}
+        renderItem={({ item }) => (
+          <DeadlineCard
+            item={item}
+            onDismiss={dismiss}
+            overleafLinks={overleafLinks}
+            onOverleafLinkAdded={refreshOverleafLinks}
+          />
+        )}}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.primary} />}
         contentContainerStyle={filtered.length === 0 ? styles.emptyContainer : styles.listContent}
         ListEmptyComponent={
