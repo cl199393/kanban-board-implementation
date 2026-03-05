@@ -57,6 +57,10 @@
       "changliu19930903@gmail.com"
     ]
   },
+  "exclude_course_patterns": ["STA4"],
   "todo_calendar": "\u4e2a\u4eba",
-  "overleaf_links": {}
+  "overleaf_links": {
+    "STA7348": "https://www.overleaf.com/project/6966e64ea8528329b6513c46",
+    "CS6750": "https://www.overleaf.com/project/6975a4dfa2734cbe386a6c98"
+  }
 }

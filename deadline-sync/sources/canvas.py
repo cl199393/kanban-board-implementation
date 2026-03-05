@@ -52,9 +52,15 @@ def sync_instance(instance: dict, lookahead_days: int) -> int:
             db.log_sync(instance_id, 0, str(e))
             return 0
 
+        exclude_patterns = cfg_module.load().get("exclude_course_patterns", [])
+
         for course in courses:
             cid = course.get("id")
             if not cid:
+                continue
+            course_name = (course.get("name") or course.get("course_code") or "").upper()
+            if any(course_name.startswith(p.upper()) for p in exclude_patterns):
+                logger.info("Canvas %s: skipping excluded course %s", instance_id, course_name)
                 continue
             assignments_url = (
                 f"{base}/api/v1/courses/{cid}/assignments"

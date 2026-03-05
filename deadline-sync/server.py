@@ -32,7 +32,8 @@ def health():
 
 @app.get("/deadlines")
 def get_deadlines(days: int = 30):
-    return db.get_upcoming(days)
+    exclude = cfg_module.load().get("exclude_course_patterns", [])
+    return db.get_upcoming(days, exclude_patterns=exclude)
 
 
 @app.post("/sync")

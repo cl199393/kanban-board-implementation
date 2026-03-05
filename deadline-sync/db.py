@@ -64,7 +64,7 @@ def upsert_deadline(d: dict) -> None:
         )
 
 
-def get_upcoming(days: int = 30) -> list[dict]:
+def get_upcoming(days: int = 30, exclude_patterns: list[str] | None = None) -> list[dict]:
     with get_conn() as conn:
         rows = conn.execute(
             """
@@ -76,7 +76,13 @@ def get_upcoming(days: int = 30) -> list[dict]:
             """,
             (str(days),),
         ).fetchall()
-    return [dict(r) for r in rows]
+    results = [dict(r) for r in rows]
+    if exclude_patterns:
+        def _excluded(row):
+            course = (row.get("course") or "").upper()
+            return any(course.startswith(p.upper()) for p in exclude_patterns)
+        results = [r for r in results if not _excluded(r)]
+    return results
 
 
 def get_all_active() -> list[dict]:
