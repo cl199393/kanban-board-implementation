@@ -68,7 +68,7 @@ function TodoItem({ card }) {
   );
 }
 
-export default function DayView({ cards, selectedDate }) {
+export default function DayView({ cards, selectedDate, height }) {
   const { theme } = useTheme();
   const dateLabel = selectedDate.toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -97,7 +97,7 @@ export default function DayView({ cards, selectedDate }) {
   const isEmpty = !emergency.length && !deadlinesToday.length && !todos.length;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.cardBg, borderBottomColor: theme.columnBorder || '#eee' }]}>
+    <View style={[styles.container, { backgroundColor: theme.cardBg, borderBottomColor: theme.columnBorder || '#eee', height: height ?? 220 }]}>
       <Text style={[styles.dateLabel, { color: theme.titleColor }]}>{dateLabel}</Text>
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
         <Section
@@ -128,10 +128,10 @@ export default function DayView({ cards, selectedDate }) {
 
 const styles = StyleSheet.create({
   container: {
-    maxHeight: 260,
     backgroundColor: '#fafafa',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+    overflow: 'hidden',
   },
   dateLabel: {
     fontSize: 13,

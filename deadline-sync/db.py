@@ -79,6 +79,14 @@ def get_upcoming(days: int = 30) -> list[dict]:
     return [dict(r) for r in rows]
 
 
+def get_all_active() -> list[dict]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM deadlines WHERE dismissed = 0 ORDER BY due_at ASC"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def get_pending_notifications() -> list[dict]:
     """Return deadlines that need 1d or 1h notifications."""
     with get_conn() as conn:

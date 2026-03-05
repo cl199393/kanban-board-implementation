@@ -1,9 +1,17 @@
 """FastAPI REST endpoints."""
+import json
+import threading
+from datetime import datetime, timezone, timedelta
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
+from icalendar import Calendar, Event
 
 import db
 import scheduler as sched_module
+import config as cfg_module
+import sources.ical as ical_source
 
 app = FastAPI(title="Deadline Sync", version="1.0.0")
 
@@ -27,7 +35,6 @@ def get_deadlines(days: int = 30):
 
 @app.post("/sync")
 def trigger_sync():
-    import threading
     thread = threading.Thread(target=sched_module.run_initial_sync, daemon=True)
     thread.start()
     return {"status": "sync started"}
@@ -39,3 +46,102 @@ def dismiss(deadline_id: str):
     if not found:
         raise HTTPException(status_code=404, detail="Deadline not found")
     return {"status": "dismissed"}
+
+
+@app.get("/calendar.ics")
+def export_calendar():
+    cal = Calendar()
+    cal.add("prodid", "-//deadline-sync//EN")
+    cal.add("version", "2.0")
+    cal.add("calscale", "GREGORIAN")
+    cal.add("x-wr-calname", "My Deadlines")
+
+    # Deadlines from DB
+    for row in db.get_all_active():
+        due_dt = datetime.fromisoformat(row["due_at"])
+        if due_dt.tzinfo is None:
+            due_dt = due_dt.replace(tzinfo=timezone.utc)
+
+        ev = Event()
+        ev.add("uid", f"{row['id']}@deadline-sync")
+        ev.add("summary", row["title"])
+        ev.add("dtstart", due_dt)
+        ev.add("dtend", due_dt)
+
+        desc_parts = []
+        if row.get("course"):
+            desc_parts.append(row["course"])
+        if row.get("notes"):
+            desc_parts.append(row["notes"])
+        if desc_parts:
+            ev.add("description", "\n".join(desc_parts))
+        if row.get("url"):
+            ev.add("url", row["url"])
+
+        cal.add_component(ev)
+
+    # Todos from todos.json
+    todos_path = "/Users/changliu/my-todo/todos.json"
+    try:
+        with open(todos_path) as f:
+            todos = json.load(f)
+        for todo in todos:
+            if todo.get("done"):
+                continue
+
+            due_str = todo.get("dueDate")
+            if due_str:
+                try:
+                    due_dt = datetime.fromisoformat(due_str).replace(
+                        hour=23, minute=59, second=0, tzinfo=timezone.utc
+                    )
+                except ValueError:
+                    due_dt = datetime.now(timezone.utc) + timedelta(days=7)
+            else:
+                due_dt = datetime.now(timezone.utc) + timedelta(days=7)
+
+            ev = Event()
+            ev.add("uid", f"todo-{todo.get('id', id(todo))}@deadline-sync")
+            ev.add("summary", todo.get("text", "Untitled Todo"))
+            ev.add("dtstart", due_dt)
+            ev.add("dtend", due_dt)
+            cal.add_component(ev)
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    return Response(content=cal.to_ical(), media_type="text/calendar; charset=utf-8")
+
+
+TODOS_PATH = "/Users/changliu/my-todo/todos.json"
+
+@app.get("/todos")
+def get_todos():
+    try:
+        with open(TODOS_PATH) as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
+
+
+@app.get("/ical-feeds")
+def list_ical_feeds():
+    return cfg_module.load().get("ical_feeds", [])
+
+
+@app.post("/ical-feeds")
+def add_ical_feed(feed: dict):
+    cfg = cfg_module.load()
+    feeds = cfg.setdefault("ical_feeds", [])
+
+    if any(f["id"] == feed["id"] for f in feeds):
+        raise HTTPException(status_code=409, detail="Feed ID already exists")
+
+    feeds.append(feed)
+    cfg_module.save(cfg)
+
+    lookahead = cfg.get("sync", {}).get("lookahead_days", 30)
+    threading.Thread(
+        target=ical_source.sync_feed, args=(feed, lookahead), daemon=True
+    ).start()
+
+    return {"status": "added"}
