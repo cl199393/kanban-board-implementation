@@ -201,6 +201,33 @@ Add to `config.json`:
 
 ---
 
+## iCalendar Export
+
+The server exposes a live `.ics` feed that includes all active deadlines and todos. Subscribe to it in any calendar app:
+
+**macOS Calendar:**
+1. Calendar → File → New Calendar Subscription…
+2. Paste: `http://localhost:8765/calendar.ics`
+3. Set auto-refresh to every 15 minutes
+
+**Google Calendar:**
+1. Other calendars → `+` → From URL
+2. Paste: `http://localhost:8765/calendar.ics`
+
+You can also add iCal feed sources at runtime without editing `config.json`:
+
+```bash
+# List current feeds
+curl http://localhost:8765/ical-feeds
+
+# Add a new feed
+curl -X POST http://localhost:8765/ical-feeds \
+  -H "Content-Type: application/json" \
+  -d '{"id": "my_feed", "name": "My Calendar", "url": "https://example.com/cal.ics"}'
+```
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -209,6 +236,10 @@ Add to `config.json`:
 | `GET` | `/deadlines?days=30` | List upcoming deadlines |
 | `POST` | `/sync` | Trigger immediate sync |
 | `POST` | `/deadlines/{id}/dismiss` | Dismiss a deadline |
+| `GET` | `/calendar.ics` | iCal feed (deadlines + todos) |
+| `GET` | `/ical-feeds` | List configured iCal feed sources |
+| `POST` | `/ical-feeds` | Add a new iCal feed source |
+| `GET` | `/todos` | List todos from todos.json |
 
 ---
 
