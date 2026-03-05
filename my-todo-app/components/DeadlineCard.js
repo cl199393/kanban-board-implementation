@@ -31,12 +31,19 @@ function countdown(dueAt) {
   return `${Math.floor(diff / 60_000)}m`;
 }
 
-function findLink(overleafLinks, course, title) {
+function findLink(courseLinks, course, title) {
   const haystack = `${course || ''} ${title || ''}`.toLowerCase();
-  const entry = Object.entries(overleafLinks).find(([k]) =>
+  const entry = Object.entries(courseLinks).find(([k]) =>
     haystack.includes(k.toLowerCase())
   );
   return entry?.[1] ?? null;
+}
+
+function linkLabel(url) {
+  if (!url) return '🔗 Open';
+  if (url.includes('overleaf.com')) return '📄 Overleaf';
+  if (url.includes('openreview.net')) return '🔬 OpenReview';
+  return '🔗 Open link';
 }
 
 function bestKey(course, title) {
@@ -66,6 +73,7 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
   const urgent = (new Date(item.due_at) - Date.now()) < 24 * 3_600_000;
 
   const overleafUrl = findLink(overleafLinks, item.course, item.title);
+  const courseLinkLabel = linkLabel(overleafUrl);
   const canvasUrl = item.url || null;
   const key = bestKey(item.course, item.title);
 
@@ -119,7 +127,7 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
         {/* Link indicators */}
         <View style={styles.linkRow}>
           {overleafUrl ? (
-            <Text style={styles.overleafTag}>📄 Overleaf</Text>
+            <Text style={styles.overleafTag}>{courseLinkLabel}</Text>
           ) : null}
           {canvasUrl && !overleafUrl ? (
             <Text style={styles.canvasTag}>🔗 Open assignment</Text>
@@ -135,7 +143,7 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
         {item.source !== 'todo' ? (
           <TouchableOpacity onPress={promptLink} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
             <Text style={styles.addLinkText}>
-              {overleafUrl ? '✏️ Edit Overleaf link' : '+ Link Overleaf project'}
+              {overleafUrl ? '✏️ Edit link' : '+ Add link'}
             </Text>
           </TouchableOpacity>
         ) : null}

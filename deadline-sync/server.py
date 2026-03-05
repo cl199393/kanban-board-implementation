@@ -339,7 +339,7 @@ def sync_todo_calendar(todo_id: int):
 
 @app.get("/overleaf-links")
 def get_overleaf_links():
-    return cfg_module.load().get("overleaf_links", {})
+    return cfg_module.load().get("course_links", {})
 
 
 @app.post("/overleaf-links")
@@ -349,6 +349,6 @@ def set_overleaf_link(body: dict):
     if not course or not url:
         raise HTTPException(status_code=400, detail="course and url required")
     cfg = cfg_module.load()
-    cfg.setdefault("overleaf_links", {})[course] = url
+    cfg.setdefault("course_links", {})[course] = url
     cfg_module.save(cfg)
     return {"status": "saved"}
