@@ -29,7 +29,6 @@ function countdown(dueAt) {
   return `${Math.floor(diff / 60_000)}m`;
 }
 
-// Match a link key against course name or title (case-insensitive substring)
 function findLink(overleafLinks, course, title) {
   const haystack = `${course || ''} ${title || ''}`.toLowerCase();
   const entry = Object.entries(overleafLinks).find(([k]) =>
@@ -38,9 +37,7 @@ function findLink(overleafLinks, course, title) {
   return entry?.[1] ?? null;
 }
 
-// Best key to store for this deadline (course code from title, or course name)
 function bestKey(course, title) {
-  // Extract [XXNNNN] pattern from title e.g. [CS6750]
   const match = title?.match(/\[([A-Z]{2,4}\d{4,5})\]/);
   if (match) return match[1];
   if (course) return course;
@@ -65,14 +62,22 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
   const label = SOURCE_LABELS[item.source] || item.source;
   const timer = countdown(item.due_at);
   const urgent = (new Date(item.due_at) - Date.now()) < 24 * 3_600_000;
+
   const overleafUrl = findLink(overleafLinks, item.course, item.title);
+  const canvasUrl = item.url || null;
   const key = bestKey(item.course, item.title);
+
+  // Primary tap: open Overleaf if linked, else Canvas/office URL
+  function onCardPress() {
+    const target = overleafUrl || canvasUrl;
+    if (target) Linking.openURL(target);
+  }
 
   function promptLink() {
     if (Platform.OS === 'ios') {
       Alert.prompt(
-        'Add Overleaf Link',
-        `Paste the Overleaf URL for "${key}".\nThis will apply to all deadlines matching that key.`,
+        'Link Overleaf Project',
+        `Paste your Overleaf URL for "${key}". It will appear on all matching deadlines.`,
         [
           { text: 'Cancel', style: 'cancel' },
           {
@@ -87,32 +92,53 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
       );
     } else {
       setUrlDraft(overleafUrl || '');
-      setShowLinkInput(true);
+      setShowLinkInput(v => !v);
     }
   }
 
+  const hasLink = !!(overleafUrl || canvasUrl);
+
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      onPress={onCardPress}
+      activeOpacity={hasLink ? 0.7 : 1}
+      style={styles.card}
+    >
+      {/* Source badge */}
       <View style={[styles.sourceBadge, { backgroundColor: color }]}>
         <Text style={styles.sourceText}>{label}</Text>
       </View>
 
+      {/* Main body */}
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
         {item.course ? <Text style={styles.course}>{item.course}</Text> : null}
 
-        <View style={styles.actions}>
+        {/* Link indicators */}
+        <View style={styles.linkRow}>
           {overleafUrl ? (
-            <TouchableOpacity onPress={() => Linking.openURL(overleafUrl)}>
-              <Text style={styles.overleafBtn}>📄 Open Overleaf</Text>
-            </TouchableOpacity>
-          ) : item.source !== 'todo' ? (
-            <TouchableOpacity onPress={promptLink}>
-              <Text style={styles.linkBtn}>🔗 Add Overleaf link</Text>
+            <Text style={styles.overleafTag}>📄 Overleaf</Text>
+          ) : null}
+          {canvasUrl && !overleafUrl ? (
+            <Text style={styles.canvasTag}>🔗 Open assignment</Text>
+          ) : null}
+          {canvasUrl && overleafUrl ? (
+            <TouchableOpacity onPress={() => Linking.openURL(canvasUrl)}>
+              <Text style={styles.canvasTag}>🏫 Canvas</Text>
             </TouchableOpacity>
           ) : null}
         </View>
 
+        {/* Overleaf link management — non-todo items only */}
+        {item.source !== 'todo' ? (
+          <TouchableOpacity onPress={promptLink} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+            <Text style={styles.addLinkText}>
+              {overleafUrl ? '✏️ Edit Overleaf link' : '+ Link Overleaf project'}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+
+        {/* Inline URL input (Android/web fallback) */}
         {showLinkInput && (
           <View style={styles.inlineInput}>
             <TextInput
@@ -142,13 +168,18 @@ export default function DeadlineCard({ item, onDismiss, overleafLinks = {}, onOv
         )}
       </View>
 
+      {/* Right: countdown + dismiss */}
       <View style={styles.right}>
         <Text style={[styles.countdown, urgent && styles.urgent]}>{timer}</Text>
-        <TouchableOpacity onPress={() => onDismiss(item.id)} style={styles.dismissBtn}>
+        <TouchableOpacity
+          onPress={() => onDismiss(item.id)}
+          style={styles.dismissBtn}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Text style={styles.dismissText}>{item.isTodo ? '✓' : '✕'}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -177,9 +208,10 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   title: { fontSize: 15, fontWeight: '600', color: '#222' },
   course: { fontSize: 12, color: '#888', marginTop: 2 },
-  actions: { marginTop: 6 },
-  overleafBtn: { fontSize: 12, color: '#4CAF50', fontWeight: '600' },
-  linkBtn: { fontSize: 12, color: '#aaa' },
+  linkRow: { flexDirection: 'row', gap: 8, marginTop: 5, flexWrap: 'wrap' },
+  overleafTag: { fontSize: 12, color: '#4CAF50', fontWeight: '600' },
+  canvasTag: { fontSize: 12, color: '#1565C0', fontWeight: '500' },
+  addLinkText: { fontSize: 11, color: '#bbb', marginTop: 4 },
   right: { alignItems: 'flex-end', marginLeft: 8 },
   countdown: { fontSize: 14, fontWeight: '700', color: '#555' },
   urgent: { color: '#e53935' },
