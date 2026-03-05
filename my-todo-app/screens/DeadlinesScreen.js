@@ -8,6 +8,7 @@ import useNotifications from '../hooks/useNotifications';
 import DeadlineCard from '../components/DeadlineCard';
 import { useTheme } from '../contexts/ThemeContext';
 import ThemePicker from '../components/ThemePicker';
+import { BACKEND_URL } from '../constants/config';
 
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -49,10 +50,18 @@ export default function DeadlinesScreen() {
   const { theme } = useTheme();
   const { deadlines, loading, error, refresh, dismiss } = useDeadlines();
   useNotifications(deadlines);
+  const [overleafLinks, setOverleafLinks] = useState({});
 
   const todayISO = toISO(new Date());
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const stripRef = useRef(null);
+
+  useEffect(() => {
+    fetch(`${BACKEND_URL}/overleaf-links`)
+      .then(r => r.ok ? r.json() : {})
+      .then(setOverleafLinks)
+      .catch(() => {});
+  }, []);
 
   // Scroll to today on mount
   useEffect(() => {
@@ -133,7 +142,7 @@ export default function DeadlinesScreen() {
       <FlatList
         data={filtered}
         keyExtractor={item => item.id}
-        renderItem={({ item }) => <DeadlineCard item={item} onDismiss={dismiss} />}
+        renderItem={({ item }) => <DeadlineCard item={item} onDismiss={dismiss} overleafLinks={overleafLinks} />}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={refresh} tintColor={theme.primary} />}
         contentContainerStyle={filtered.length === 0 ? styles.emptyContainer : styles.listContent}
         ListEmptyComponent={

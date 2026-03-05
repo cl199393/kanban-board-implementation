@@ -1,5 +1,6 @@
 """FastAPI REST endpoints."""
 import json
+import subprocess
 import threading
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -255,3 +256,77 @@ def add_ical_feed(feed: dict):
     ).start()
 
     return {"status": "added"}
+
+
+# ── Apple Calendar sync for todos ────────────────────────────────────────────
+
+def _build_cal_event_script(calendar_name: str, title: str, y: int, mo: int, dy: int,
+                             h: int, mi: int) -> str:
+    safe_title = title.replace('"', '\\"')
+    safe_cal = calendar_name.replace('"', '\\"')
+    return f"""
+tell application "Calendar"
+    set theCal to calendar "{safe_cal}"
+    set startDate to current date
+    set year of startDate to {y}
+    set month of startDate to {mo}
+    set day of startDate to {dy}
+    set hours of startDate to {h}
+    set minutes of startDate to {mi}
+    set seconds of startDate to 0
+    make new event at end of events of theCal with properties {{summary:"{safe_title}", start date:startDate, end date:startDate}}
+end tell
+"""
+
+
+@app.post("/todos/{todo_id}/sync-calendar")
+def sync_todo_calendar(todo_id: int):
+    try:
+        with open(TODOS_PATH) as f:
+            todos = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        raise HTTPException(status_code=404, detail="todos.json not found")
+
+    todo = next((t for t in todos if t.get("id") == todo_id), None)
+    if not todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    due_date = todo.get("dueDate")
+    if not due_date:
+        return {"status": "skipped", "reason": "no due date"}
+
+    due_time = todo.get("dueTime") or "23:59"
+    try:
+        y, mo, dy = (int(x) for x in due_date.split("-"))
+        h, mi = (int(x) for x in due_time.split(":"))
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid date/time format")
+
+    cfg = cfg_module.load()
+    cal_name = cfg.get("todo_calendar", "个人")
+
+    script = _build_cal_event_script(cal_name, todo["text"], y, mo, dy, h, mi)
+    result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=15)
+    if result.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"AppleScript error: {result.stderr.strip()}")
+
+    return {"status": "synced"}
+
+
+# ── Overleaf links ────────────────────────────────────────────────────────────
+
+@app.get("/overleaf-links")
+def get_overleaf_links():
+    return cfg_module.load().get("overleaf_links", {})
+
+
+@app.post("/overleaf-links")
+def set_overleaf_link(body: dict):
+    course = body.get("course", "").strip()
+    url = body.get("url", "").strip()
+    if not course or not url:
+        raise HTTPException(status_code=400, detail="course and url required")
+    cfg = cfg_module.load()
+    cfg.setdefault("overleaf_links", {})[course] = url
+    cfg_module.save(cfg)
+    return {"status": "saved"}

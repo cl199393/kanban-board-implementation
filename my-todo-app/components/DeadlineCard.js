@@ -1,17 +1,19 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 
 const SOURCE_COLORS = {
-  canvas_gt: '#B3A369',
+  canvas_gt:  '#B3A369',
   canvas_ucf: '#FFC904',
-  microsoft: '#0078D4',
-  gmail: '#EA4335',
+  microsoft:  '#0078D4',
+  gmail:      '#EA4335',
+  todo:       '#4CAF50',
 };
 
 const SOURCE_LABELS = {
-  canvas_gt: 'GT Canvas',
+  canvas_gt:  'GT Canvas',
   canvas_ucf: 'UCF Canvas',
-  microsoft: 'Microsoft',
-  gmail: 'Gmail',
+  microsoft:  'Microsoft',
+  gmail:      'Gmail',
+  todo:       'Todo',
 };
 
 function countdown(dueAt) {
@@ -25,11 +27,19 @@ function countdown(dueAt) {
   return `${Math.floor(diff / 60_000)}m`;
 }
 
-export default function DeadlineCard({ item, onDismiss }) {
+export default function DeadlineCard({ item, onDismiss, overleafLinks = {} }) {
   const color = SOURCE_COLORS[item.source] || '#888';
   const label = SOURCE_LABELS[item.source] || item.source;
   const timer = countdown(item.due_at);
   const urgent = (new Date(item.due_at) - Date.now()) < 24 * 3_600_000;
+
+  // Find Overleaf link: match by course name (substring match)
+  const overleafUrl = item.course
+    ? Object.entries(overleafLinks).find(([k]) =>
+        item.course.toLowerCase().includes(k.toLowerCase()) ||
+        k.toLowerCase().includes(item.course.toLowerCase())
+      )?.[1]
+    : null;
 
   return (
     <View style={styles.card}>
@@ -39,11 +49,16 @@ export default function DeadlineCard({ item, onDismiss }) {
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={2}>{item.title}</Text>
         {item.course ? <Text style={styles.course}>{item.course}</Text> : null}
+        {overleafUrl ? (
+          <TouchableOpacity onPress={() => Linking.openURL(overleafUrl)} style={styles.overleafBtn}>
+            <Text style={styles.overleafText}>📄 Open in Overleaf</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
       <View style={styles.right}>
         <Text style={[styles.countdown, urgent && styles.urgent]}>{timer}</Text>
         <TouchableOpacity onPress={() => onDismiss(item.id)} style={styles.dismissBtn}>
-          <Text style={styles.dismissText}>✕</Text>
+          <Text style={styles.dismissText}>{item.isTodo ? '✓' : '✕'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -75,6 +90,8 @@ const styles = StyleSheet.create({
   body: { flex: 1 },
   title: { fontSize: 15, fontWeight: '600', color: '#222' },
   course: { fontSize: 12, color: '#888', marginTop: 2 },
+  overleafBtn: { marginTop: 6 },
+  overleafText: { fontSize: 12, color: '#4CAF50', fontWeight: '600' },
   right: { alignItems: 'flex-end', marginLeft: 8 },
   countdown: { fontSize: 14, fontWeight: '700', color: '#555' },
   urgent: { color: '#e53935' },

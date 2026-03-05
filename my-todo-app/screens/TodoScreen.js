@@ -143,18 +143,23 @@ export default function TodoScreen() {
   function addTodo() {
     const text = input.trim();
     if (!text) return;
-    save([...todos, {
+    const newTodo = {
       id: Date.now(),
       text,
       done: false,
       dueDate: dueDate || null,
       dueTime: dueTime || null,
       location: location.trim() || null,
-    }]);
+    };
+    save([...todos, newTodo]);
     setInput('');
     setDueDate(selectedDate);
     const now = new Date();
     setDueTime(`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`);
+    // Sync to Apple Calendar in background
+    if (newTodo.dueDate) {
+      fetch(`${BACKEND_URL}/todos/${newTodo.id}/sync-calendar`, { method: 'POST' }).catch(() => {});
+    }
   }
 
   function toggleDone(id) {
