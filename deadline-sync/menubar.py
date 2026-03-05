@@ -23,6 +23,7 @@ SOURCE_LABELS = {
     "microsoft":  "Microsoft",
     "gmail":      "Gmail",
     "todo":       "Todo",
+    "manual":     "Manual",
 }
 
 SOURCE_ICONS = {
@@ -31,6 +32,7 @@ SOURCE_ICONS = {
     "microsoft":  "🔵",
     "gmail":      "🔴",
     "todo":       "📝",
+    "manual":     "🔖",
 }
 
 # IDs already notified as emergency this session (avoid repeat alerts)

@@ -8,6 +8,7 @@ const SOURCE_COLORS = {
   microsoft:  '#0078D4',
   gmail:      '#EA4335',
   todo:       '#4CAF50',
+  manual:     '#9C27B0',
 };
 
 const SOURCE_LABELS = {
@@ -16,6 +17,7 @@ const SOURCE_LABELS = {
   microsoft:  'Microsoft',
   gmail:      'Gmail',
   todo:       'Todo',
+  manual:     'Manual',
 };
 
 function countdown(dueAt) {

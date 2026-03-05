@@ -36,6 +36,27 @@ def get_deadlines(days: int = 30):
     return db.get_upcoming(days, exclude_patterns=exclude)
 
 
+@app.post("/deadlines")
+def add_deadline(body: dict):
+    title = body.get("title", "").strip()
+    due_at = body.get("due_at", "").strip()
+    if not title or not due_at:
+        raise HTTPException(status_code=400, detail="title and due_at required")
+    import time as _time
+    uid = f"manual:{int(_time.time())}"
+    db.upsert_deadline({
+        "id": uid,
+        "source": "manual",
+        "source_id": uid,
+        "title": title,
+        "course": body.get("course") or None,
+        "due_at": due_at,
+        "url": body.get("url") or None,
+        "notes": body.get("notes") or None,
+    })
+    return {"id": uid, "status": "created"}
+
+
 @app.post("/sync")
 def trigger_sync():
     thread = threading.Thread(target=sched_module.run_initial_sync, daemon=True)
